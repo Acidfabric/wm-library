@@ -3,45 +3,48 @@ import { AsyncStorage } from 'react-native';
 export default {
   async initStorage() {
     const initBooks = [
-      {qr: 2, name: 'THE LEVITAN PITCH', isAvailable: true},
-      {qr: 1, name: 'YES TO THE MESS', isAvailable: true},
+      { qr: '2', name: 'THE LEVITAN PITCH', isAvailable: true },
+      { qr: '1', name: 'YES TO THE MESS', isAvailable: true }
     ];
     const initUsers = [
       {
         name: 'Karolis',
-        faceId: '84246a55-910a-4665-ba5b-4a6605274cba', 
-        books:[]
+        faceId: '84246a55-910a-4665-ba5b-4a6605274cba',
+        books: []
       },
       {
-        name: 'Tomas',
+        name: 'Thomas, also known as Lebron',
         faceId: '668fad48-7845-4b04-8abd-9a11331e263f',
-        books:[]
+        books: []
       },
       {
         name: 'Indre',
         faceId: '6a79a85a-adb6-45f7-a208-3179fc25dabd',
-        books:[]
+        books: []
       },
       {
         name: 'Arminas',
         faceId: '778249a5-83fa-4be8-bee7-498eec197bee',
-        books:[]
+        books: []
       },
       {
         name: 'Domas',
         faceId: 'bfc77a3d-db96-4720-bb97-809fc00e9a74',
-        books:[]
+        books: []
       },
       {
         name: 'Danas',
         faceId: 'e28c79f8-106e-44a5-948a-c8ee782a1080',
-        books:[]
-      },
+        books: []
+      }
     ];
-  
+
     try {
+      // const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
+      // if (!storedUsers) {
       await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(initUsers));
       await AsyncStorage.setItem('@DanskeLibrary:Books', JSON.stringify(initBooks));
+      // }
 
       return { success: true };
     } catch (error) {
@@ -54,7 +57,7 @@ export default {
       const storedBooks = await AsyncStorage.getItem('@DanskeLibrary:Books');
       const booksArr = await JSON.parse(storedBooks);
 
-      return { books: booksArr }
+      return { books: booksArr };
     } catch (error) {
       console.log(error);
     }
@@ -65,14 +68,15 @@ export default {
       const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
       const usersArr = await JSON.parse(storedUsers);
 
-      return { users: usersArr }
+      return { users: usersArr };
     } catch (error) {
       console.log(error);
     }
   },
 
   async manageBook(request) {
-    const { faceId, bookQr} = request;
+    console.log('manageBook', request);
+    const { faceId, bookQr } = request;
 
     try {
       const storedBooks = await AsyncStorage.getItem('@DanskeLibrary:Books');
@@ -81,22 +85,28 @@ export default {
       const booksArr = JSON.parse(storedBooks);
       const usersArr = JSON.parse(storedUsers);
 
-      const userFound = usersArr.find(user => { return user.faceId === faceId });
-      const bookFound = booksArr.find(book => { return book.qr === bookQr });
-      const userHasThisBook = userFound.books.find(book => { return book === bookQr });
-      
+      const userFound = usersArr.find(user => {
+        return user.faceId === faceId;
+      });
+      const bookFound = booksArr.find(book => {
+        return book.qr === bookQr;
+      });
+      const userHasThisBook = userFound.books.find(book => {
+        return book === bookQr;
+      });
+
       const userIndex = usersArr.indexOf(userFound);
       const bookIndex = booksArr.indexOf(bookFound);
 
-      if(!userFound) {
-        return { success: false, message: 'user doesn\'t exist' }
+      if (!userFound) {
+        return { success: false, message: "user doesn't exist" };
       }
 
-      if(!bookFound) {
-        return { success: false, message: 'this book doesn\'t exist in the library' };
-      } 
+      if (!bookFound) {
+        return { success: false, message: "this book doesn't exist in the library" };
+      }
 
-      if(bookFound && bookFound.isAvailable) {
+      if (bookFound && bookFound.isAvailable) {
         userFound.books.push(bookQr);
         bookFound.isAvailable = false;
 
@@ -106,8 +116,15 @@ export default {
         try {
           await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(usersArr));
           await AsyncStorage.setItem('@DanskeLibrary:Books', JSON.stringify(booksArr));
-  
-          return { success: true, message: 'Congratulations ' + userFound.name + '! You have taken the book - ' + bookFound.name }
+
+          return {
+            success: true,
+            message:
+              'Congratulations ' +
+              userFound.name +
+              '! You have taken the book. Enjoy reading ' +
+              bookFound.name
+          };
         } catch (error) {
           console.log(error);
         }
@@ -129,16 +146,22 @@ export default {
           await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(usersArr));
           await AsyncStorage.setItem('@DanskeLibrary:Books', JSON.stringify(booksArr));
 
-          return { success: true, message: 'Congratulations ' + userFound.name + '! You bring back the book - ' + bookFound.name }
+          return {
+            success: true,
+            message:
+              'Congratulations ' +
+              userFound.name +
+              '! You have returned the book - ' +
+              bookFound.name
+          };
         } catch (error) {
           console.log(error);
         }
-
       } else {
-        return { success: false, message: 'Book is not available' }
+        return { success: false, message: 'Sorry, ' + userFound.name + ', book is not available' };
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
@@ -164,4 +187,4 @@ export default {
   //     console.log(error);
   //   }
   // },
-}
+};

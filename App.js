@@ -41,7 +41,7 @@ export default class App extends React.Component {
   }
 
   async componentDidMount() {
-    const response = await this.takeABookForDanas();
+    const response = await this.initStorage();
     console.log(response);
   }
 
