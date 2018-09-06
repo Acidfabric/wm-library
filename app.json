@@ -2,7 +2,6 @@
   "expo": {
     "name": "WM Library",
     "sdkVersion": "27.0.0",
-    "icon": "./src/assets/icon.png",
     "privacy": "unlisted"
   }
 }
