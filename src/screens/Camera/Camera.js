@@ -1,13 +1,14 @@
 import React from "react";
 import { Button, Container, Content, Text, View } from "native-base";
-import { Camera, Permissions } from "expo";
+import { Camera, Permissions, BarCodeScanner } from "expo";
 
 export default class CameraScreen extends React.Component {
   static navigationOptions = {
-    title: 'Bookifizer',
+    title: "Bookifizer"
   };
 
   state = {
+    barcode: "",
     hasCameraPermission: null,
     type: Camera.Constants.Type.back
   };
@@ -27,8 +28,21 @@ export default class CameraScreen extends React.Component {
     } else {
       return (content = (
         <View style={{ flex: 1 }}>
-          <Camera style={{ flex: 1 }} type={this.state.type}>
-            <View
+          {this.state.barcode ? (
+            <Camera style={{ flex: 1 }} type={Camera.Constants.Type.front} />
+          ) : (
+            <BarCodeScanner
+              style={{ flex: 1 }}
+              type={Camera.Constants.Type.front}
+              onBarCodeRead={({ data }) => {
+                console.log("Barcode read", data);
+                this.setState({
+                  barcode: data
+                });
+              }}
+            />
+          )}
+          {/* <View
               style={{
                 flex: 1,
                 backgroundColor: "transparent",
@@ -57,8 +71,8 @@ export default class CameraScreen extends React.Component {
                   Flip{" "}
                 </Text>
               </Button>
-            </View>
-          </Camera>
+            </View> 
+          </Camera> */}
         </View>
       ));
     }
