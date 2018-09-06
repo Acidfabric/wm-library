@@ -14,7 +14,7 @@ export default {
       },
       {
         name: 'Thomas, also known as Lebron',
-        faceId: '668fad48-7845-4b04-8abd-9a11331e263f',
+        faceId: 'e28c79f8-106e-44a5-948a-c8ee782a1080',
         books: []
       },
       {
@@ -40,11 +40,11 @@ export default {
     ];
 
     try {
-      // const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
-      // if (!storedUsers) {
-      await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(initUsers));
-      await AsyncStorage.setItem('@DanskeLibrary:Books', JSON.stringify(initBooks));
-      // }
+      const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
+      if (!storedUsers) {
+        await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(initUsers));
+        await AsyncStorage.setItem('@DanskeLibrary:Books', JSON.stringify(initBooks));
+      }
 
       return { success: true };
     } catch (error) {
@@ -88,23 +88,25 @@ export default {
       const userFound = usersArr.find(user => {
         return user.faceId === faceId;
       });
+
+      if (!userFound) {
+        return { success: false, message: "user doesn't exist" };
+      }
+
       const bookFound = booksArr.find(book => {
         return book.qr === bookQr;
       });
+
+      if (!bookFound) {
+        return { success: false, message: "this book doesn't exist in the library" };
+      }
+
       const userHasThisBook = userFound.books.find(book => {
         return book === bookQr;
       });
 
       const userIndex = usersArr.indexOf(userFound);
       const bookIndex = booksArr.indexOf(bookFound);
-
-      if (!userFound) {
-        return { success: false, message: "user doesn't exist" };
-      }
-
-      if (!bookFound) {
-        return { success: false, message: "this book doesn't exist in the library" };
-      }
 
       if (bookFound && bookFound.isAvailable) {
         userFound.books.push(bookQr);
@@ -163,28 +165,28 @@ export default {
     } catch (error) {
       console.log(error);
     }
+  },
+
+  async registration(request) {
+    const { name, faceId } = request;
+    const newUser = { name, faceId, books: [] };
+
+    try {
+      const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
+      if (storedUsers) {
+        let existingUsers = JSON.parse(storedUsers);
+        existingUsers.push(newUser);
+
+        try {
+          await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(existingUsers));
+
+          return { success: true };
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
-
-  // registration = async(request) => {
-  //   const { name, faceId, bookQr } = request;
-  //   const newUser = {name, faceId, books: [bookQr]};
-
-  //   try {
-  //     const storedUsers = await AsyncStorage.getItem('@DanskeLibrary:Users');
-  //     if (storedUsers) {
-  //       let existingUsers = JSON.parse(storedUsers);
-  //       existingUsers.push(newUser);
-
-  //       try {
-  //         await AsyncStorage.setItem('@DanskeLibrary:Users', JSON.stringify(existingUsers));
-
-  //         return { success: true };
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // },
 };
